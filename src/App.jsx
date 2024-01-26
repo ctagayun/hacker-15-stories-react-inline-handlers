@@ -118,13 +118,17 @@ import * as React from 'react';
         met, the item stays in the newly created array; if the function 
         returns false, it's removed from the filtered array.
 
-        Pass this when instantiating List component as prop
-      */
+         Pass this handler to List component when instantiating the component
+       
+        */
       const handleRemoveStory = (item) => { 
         const newStories = stories.filter(   
           (story) => item.objectID !== story.objectID
         );
-        //updater function sets updates the stateful variable called 'stories'
+        //updater function updates the stateful variable 
+        //called 'stories'. Since the state has changed
+        //(e.g an item was deleted), the App, List, Item
+        //components will re-render
         setStories(newStories);
       }
 
@@ -219,7 +223,7 @@ import * as React from 'react';
 
    One popular solution is to use an inline arrow function, 
    which allows us to sneak in arguments like the item:
-  <button type="button" onClick={() => onRemoveItem(item)}> 
+   <button type="button" onClick={() => onRemoveItem(item)}> 
         Dismiss
    </button>
  
@@ -233,7 +237,7 @@ import * as React from 'react';
       <span>{item.num_comments}</span>
       <span>{item.points}</span>
       <span>
-       <button type="button" onClick={() => onRemoveItem(item)}>
+       <button type="button" onClick={() => onRemoveItem(item)}>  
            Dismiss
        </button>
       </span>
