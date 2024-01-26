@@ -1,17 +1,19 @@
 /*================================================================
  Inline Handlers
-    Task: The application renders a list of items and allows its 
+    
+ Task: The application renders a list of items and allows its 
   users to filter the list via a search feature. Next the application 
   should render a button next to each list item which allows its users 
   to remove the item from the list.. 
 
-  Optional Hints:
-
+  Sub Tasks:
     1. The list of items needs to become a stateful value in order to 
        manipulate it (e.g. removing an item) later.
+
     2. Every list item renders a button with a click handler. When 
        clicking the button, the item gets removed from the list by manipulating 
        the state.
+
     3. Since the stateful list resides in the App component, one needs 
        to use callback handlers to enable the Item component to communicate 
        up to the App component for removing an item by its identifier.
@@ -28,6 +30,14 @@
 =============================================*/
 
 import * as React from 'react';
+
+    /*
+      At the moment initialStories is unstateful variable
+      To gain control over the list, lets make it stateful.
+      By using it as initial state in React's useState Hook. The 
+      returned values from the array are the current state (stories) 
+      and the state updater function (setStories):
+    */
     const initialStories = [
     {
       title: 'React',
@@ -47,62 +57,42 @@ import * as React from 'react';
     },
   ]
 
-  //Create a custom hook called "useStorageState". We will use two hooks 
-  //to create it:
-  //    1. useState
-  //    2. useEffect 
-  
-  //This is a custom hook that will store the state in a 
-  //local storage. useStorageState which will keep the component's 
-  //state in sync with the browser's local storage.
+  /* This is a custom hook that will store the state in a 
+     local storage. useStorageState which will keep the component's 
+     state in sync with the browser's local storage.
 
-  /*This new custom hook returns
+    This custom hook returns
       1. state 
       2. and a state updater function
-   and accepts an initial state as argument. 
-  */
-    
-  const useStorageState = (key, initialState) => {
-     //using the the parameter 'key'. it goes to the local storage
-     //to fetch the state if not found uses the parameter 'initialState' 
-     //and assigns it to "value" otherwise the state fetched from
-     //local storage will be used and assigned to 'value
-     //   Note: 1. value is the generic name for state
-     //         2. setValue is the name of the function that will 
-     //            update the 'value'
- 
-     /* This is the custom hook before it was refactored to make it generic:
+    and accepts an initial state as argument. 
+
+     This is the custom hook before it was refactored to make it generic:
      const [searchTerm, setSearchTerm] = React.useState(''); 
-          1. searchTerm renamed to 'value'
-          2. setSearchTerm renamed to 'setValue'
-      */
+        1. searchTerm renamed to 'value'
+        2. setSearchTerm renamed to 'setValue'
+  */
+  const useStorageState = (key, initialState) => {
      const [value, setValue] = React.useState(
         localStorage.getItem('key') || initialState 
      );
      
      React.useEffect(() => {
        console.log('useEffect fired. Displaying value of dependency array ' + [ value, key]  );
-
-       /* The following code is the first parameter of useEffect - a function.
-          This function looks for an item in the localStorage using "key".
-          Key is a generic it contains the value "search" of 'search/value' 
-          and set 'value' to 'searchTerm' which is the state 
-       */
          localStorage.setItem(key, value);  
         },
-        [value, key]  
+        [value, key]   //Dependency array
         ); //EOF useEffect
     
      //the returned values are returned as an array.
-     //to make it generic change [searchTerm, setSearchTerm] to [value , setValue]
-     //Again: searchTerm is the state. setSearchTerm is the state updater
-     //function.
      return [value, setValue]; 
 
   } //EOF create custom hook
   
  const App = () => { 
-      //Call custom useStorageState hook to assign value to searchTerm, setSearchTerm
+      /* 
+      Call custom useStorageState hook to assign value to searchTerm, 
+      setSearchTerm
+      */
       const [searchTerm, setSearchTerm] =  useStorageState (
         'search', //key
         'React',  //Initial state
@@ -110,22 +100,34 @@ import * as React from 'react';
       console.log('Value assigned to search term is = ' + searchTerm); 
       console.log('Value assigned tosetSearchTerm is = ' + setSearchTerm); 
 
-      /*
-       To gain control over the list, make it stateful by using it as initial 
+      /* Step 1:
+         To gain control over the stories, make it stateful by using it as initial 
        state in React's useState Hook. The returned values from the array are 
        the current state (stories) and the state updater function (setStories):
       */
       const [stories, setStories] = React.useState(initialStories);
 
-      /*
-       Next write and event handler which removes an item from list
+      /* Step 2: Next we write event handler which removes an item from list
+         Select the record from the state called 'stories' based on the filter
+         Here, the JavaScript array's built-in filter method creates
+         a new filtered array called 'story'.
+
+          The filter() method takes a function as an argument, 
+        which accesses each item in the array and returns /
+        true or false. If the function returns true, meaning the condition is 
+        met, the item stays in the newly created array; if the function 
+        returns false, it's removed from the filtered array.
+
+        Pass this when instantiating List component as prop
       */
-      const handleRemoveStory = (item) => {
-        const newStories = stories.filter(
+      const handleRemoveStory = (item) => { 
+        const newStories = stories.filter(   
           (story) => item.objectID !== story.objectID
         );
-        setStories (newStories);
+        //updater function sets updates the stateful variable called 'stories'
+        setStories(newStories);
       }
+
       const handleSearch = (event) => {
           setSearchTerm(event.target.value); 
         };
@@ -146,11 +148,11 @@ import * as React from 'react';
              onInputChange={handleSearch} //assign name of callback handler
             >
               <strong>Search:</strong>Search: 
-             </InputWithLabel>
             
+           </InputWithLabel>
           <hr />
-    
-          <List list={searchedStories} onRemoveItem = {handleRemoveStory}/>
+          
+          <List list={searchedStories} onRemoveItem = {handleRemoveStory}/> 
         </>
       );
     }
@@ -186,6 +188,20 @@ import * as React from 'react';
         );
     };
     
+   /*
+     Instantiate Item component. Pass three props:
+       1. objectID 2. Item 3. onRemoveItem prop which was assigned 
+          the callback handler 'handleRemoveStory'
+     <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem}
+     
+     Finally, the Item component uses the incoming callback handler 
+     as a function in a new handler. In this handler, we will pass the 
+     specific item to it. 
+     
+     Moreover, an additional button element is needed to trigger
+     the actual event:
+
+   */
    const List = ({list, onRemoveItem}) => ( 
     <ul>
        {list.map((item) => (
@@ -201,7 +217,6 @@ import * as React from 'react';
    item to it. Moreover, an additional button element is needed to trigger 
    the actual event:
 
-    
    One popular solution is to use an inline arrow function, 
    which allows us to sneak in arguments like the item:
   <button type="button" onClick={() => onRemoveItem(item)}> 
@@ -209,7 +224,7 @@ import * as React from 'react';
    </button>
  
   */
-  const Item = ({item}) => (   
+  const Item = ({item, onRemoveItem}) => (   
     <li>
       <span>
         <a href={item.url}>{item.title}</a>
@@ -218,9 +233,9 @@ import * as React from 'react';
       <span>{item.num_comments}</span>
       <span>{item.points}</span>
       <span>
-      <button type="button" onClick={() => onRemoveItem(item)}> 
-         Dismiss
-      </button>
+       <button type="button" onClick={() => onRemoveItem(item)}>
+           Dismiss
+       </button>
       </span>
     </li>
   );   
@@ -237,3 +252,12 @@ export default App;
  //stateful value which changes over time. And whenever this stateful value 
  //changes, the affected components (here: Search component) 
  //will re-render to use it (here: to display the recent value).
+
+ /* 
+     The filter() method takes a function 
+        as an argument, which accesses each item in the array and returns /
+        true or false. If the function returns true, meaning the condition is 
+        met, the item stays in the newly created array; if the function 
+        returns false, it's removed from the filtered array.
+
+ */
