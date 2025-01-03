@@ -1,11 +1,11 @@
 /*================================================================
  Inline Handlers
-    
- Task: The application renders a list of items and allows its 
+   Task: The application renders a list of items and allows its 
   users to filter the list via a search feature. Next the application 
   should render a button next to each list item which allows its users 
   to remove the item from the list.. 
 
+  Test
   Sub Tasks:
     1. The list of items needs to become a stateful value in order to 
        manipulate it (e.g. removing an item) later.
